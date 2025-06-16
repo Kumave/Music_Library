@@ -22,16 +22,16 @@ Este proyecto es una aplicación web simple que permite gestionar una biblioteca
 
 ##  ﹕﹒୨ৎ﹒Instrucciones de uso!
 
-1.Clona o descarga el proyecto(Descargar el ZIP del proyecto y descomprimirlo, o Clonar el repositorio en GitHub:)
+1. Clona o descarga el proyecto(Descargar el ZIP del proyecto y descomprimirlo, o Clonar el repositorio en GitHub:)
 2. Crea un proyecto en [Firebase](https://console.firebase.google.com/)
 3. Activa **Firestore Database** y **modo prueba** por 30 días.
 4. Copia las credenciales del proyecto (API Key, Project ID, etc.)
 5. Pega esos datos en `firebase-config.js`
 6. Abre el proyecto en [Replit](https://replit.com/) o localmente.
-7. Agrega tu música (Llena el formulario con:
-Título, Autor, Año y Género, luego jaz clic en “Guardar”
+7. Agrega tu música (Llena el formulario con: Título, Autor, Año y Género, luego jaz clic en “Guardar”
 8. Busca por título (Usa la barra de búsqueda para filtrar por nombre de canción)
-9.  Edita o elimina(Puedes editarla o eliminarla fácilmente con los botones)
+9. Edita o elimina(Puedes editarla o eliminarla fácilmente con los botones)
+10.Disfruta la música de fondo(Usa el botón “ Silenciar” o “Activar música” para controlarla)
 
 
 ##  ﹕﹒୨ৎ﹒Funcionalidades!
