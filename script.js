@@ -1,5 +1,27 @@
+document.addEventListener('DOMContentLoaded', () => {
+  const audio = document.getElementById('audioMusica');
+  document.body.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play().catch(e => console.log('No se pudo reproducir aún:', e));
+    }
+  }, { once: true });
+});
+const toggleBtn = document.getElementById('toggleMusica');
+const audio = document.getElementById('audioMusica');
+
+toggleBtn.addEventListener('click', () => {
+  if (audio.paused) {
+    audio.play();
+    toggleBtn.textContent = '──★ ˙🍓 Silenciar música ̟ !!';
+  } else {
+    audio.pause();
+    toggleBtn.textContent = '──★ ˙🍓 ̟Reproducir música !!';
+  }
+});
+
 import {
-  collection, addDoc, getDocs, deleteDoc, updateDoc, doc, query, where
+  collection, addDoc, getDocs, deleteDoc, updateDoc,
+  doc, query, where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db } from './firebase-config.js';
 
@@ -14,43 +36,52 @@ MusicForm.addEventListener('submit', async (e) => {
   const autor = MusicForm.autor.value;
   const anio = parseInt(MusicForm.anio.value);
   const genero = MusicForm.genero.value;
+  const tags = MusicForm.tags.value.split(',').map(tag => tag.trim());
 
-  await addDoc(musicaRef, { titulo, autor, anio, genero });
+  await addDoc(musicaRef, { titulo, autor, anio, genero, tags });
   MusicForm.reset();
-  mostrarCanciones();
+  mostrarMusica();
 });
 
-async function mostrarCanciones() {
+async function mostrarMusica() {
   listaMusica.innerHTML = '';
   const querySnapshot = await getDocs(musicaRef);
-  querySnapshot.forEach(docSnap => {
+
+  querySnapshot.forEach((docSnap) => {
     const cancion = docSnap.data();
     const div = document.createElement('div');
     div.className = 'card';
+
+    const tags = cancion.tags?.join(', ') || 'Sin etiquetas';
+
     div.innerHTML = `
       <h3>${cancion.titulo}</h3>
-      <p><strong>Artista:</strong> ${cancion.autor}</p>
-      <p><strong>Año:</strong> ${cancion.anio}</p>
-      <p><strong>Género:</strong> ${cancion.genero}</p>
-      <button class="edit" onclick="editarCancion('${docSnap.id}', '${cancion.titulo}', '${cancion.autor}', ${cancion.anio}, '${cancion.genero}')">Editar</button>
-      <button class="delete" onclick="eliminarCancion('${docSnap.id}')">Eliminar</button>
+      <p> ${cancion.autor}</p>
+      <p> ${cancion.anio}</p>
+      <p> ${cancion.genero}</p>
+      <p> ${tags}</p>
+      <button class="edit" onclick="editarMusica('${docSnap.id}', '${cancion.titulo}', '${cancion.autor}', ${cancion.anio}, '${cancion.genero}', '${tags}')">Editar</button>
+      <button class="delete" onclick="eliminarMusica('${docSnap.id}')">Eliminar</button>
     `;
+
     listaMusica.appendChild(div);
   });
 }
 
-async function eliminarCancion(id) {
+
+async function eliminarMusica(id) {
   await deleteDoc(doc(db, 'Musica', id));
-  mostrarCanciones();
+  mostrarMusica();
 }
 
-window.eliminarCancion = eliminarCancion;
+window.eliminarMusica = eliminarMusica;
 
-window.editarCancion = (id, titulo, autor, anio, genero) => {
+window.editarMusica = (id, titulo, autor, anio, genero, tags) => {
   MusicForm.titulo.value = titulo;
   MusicForm.autor.value = autor;
   MusicForm.anio.value = anio;
   MusicForm.genero.value = genero;
+  MusicForm.tags.value = tags;
 
   MusicForm.onsubmit = async (e) => {
     e.preventDefault();
@@ -58,27 +89,29 @@ window.editarCancion = (id, titulo, autor, anio, genero) => {
     const nuevoAutor = MusicForm.autor.value;
     const nuevoAnio = parseInt(MusicForm.anio.value);
     const nuevoGenero = MusicForm.genero.value;
+    const nuevasTags = MusicForm.tags.value.split(',').map(tag => tag.trim());
 
     await updateDoc(doc(db, 'Musica', id), {
       titulo: nuevoTitulo,
       autor: nuevoAutor,
       anio: nuevoAnio,
-      genero: nuevoGenero
+      genero: nuevoGenero,
+      tags: nuevasTags
     });
 
     MusicForm.reset();
-    MusicForm.onsubmit = guardarCancion;
-    mostrarCanciones();
+    MusicForm.onsubmit = guardarMusica;
+    mostrarMusica();
   };
 };
 
-function guardarCancion(e) {
+function guardarMusica(e) {
   e.preventDefault();
 }
 
-async function buscarLibro() {
+async function buscarMusica() {
   const texto = buscarInput.value.trim();
-  if (!texto) return mostrarCanciones();
+  if (!texto) return mostrarMusica();
 
   listaMusica.innerHTML = '';
   const q = query(musicaRef, where('titulo', '==', texto));
@@ -90,12 +123,13 @@ async function buscarLibro() {
     div.className = 'card';
     div.innerHTML = `
       <h3>${cancion.titulo}</h3>
-      <p><strong>Artista:</strong> ${cancion.autor}</p>
-      <p><strong>Año:</strong> ${cancion.anio}</p>
-      <p><strong>Género:</strong> ${cancion.genero}</p>
+      <p>${cancion.autor}</p>
+      <p>${cancion.anio}</p>
+      <p>${cancion.genero}</p>
+      <p>${cancion.tags.join(', ')}</p>
     `;
     listaMusica.appendChild(div);
   });
 }
 
-mostrarCanciones();
+mostrarMusica();
