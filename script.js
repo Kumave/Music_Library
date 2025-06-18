@@ -1,36 +1,15 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const audio = document.getElementById('audioMusica');
-  document.body.addEventListener('click', () => {
-    if (audio.paused) {
-      audio.play().catch(e => console.log('No se pudo reproducir aún:', e));
-    }
-  }, { once: true });
-});
-const toggleBtn = document.getElementById('toggleMusica');
-const audio = document.getElementById('audioMusica');
-
-toggleBtn.addEventListener('click', () => {
-  if (audio.paused) {
-    audio.play();
-    toggleBtn.textContent = '──★ ˙🍓 Silenciar música ̟ !!';
-  } else {
-    audio.pause();
-    toggleBtn.textContent = '──★ ˙🍓 ̟Reproducir música !!';
-  }
-});
-
 import {
   collection, addDoc, getDocs, deleteDoc, updateDoc,
-  doc, query, where
+  doc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { db } from './firebase-config.js';
 
 const MusicForm = document.getElementById('MusicForm');
 const listaMusica = document.getElementById('listaMusica');
-const buscarInput = document.getElementById('buscarInput');
 const musicaRef = collection(db, 'Musica');
+MusicForm.onsubmit = guardarMusica;
 
-MusicForm.addEventListener('submit', async (e) => {
+function guardarMusica(e) {
   e.preventDefault();
   const titulo = MusicForm.titulo.value;
   const autor = MusicForm.autor.value;
@@ -38,10 +17,11 @@ MusicForm.addEventListener('submit', async (e) => {
   const genero = MusicForm.genero.value;
   const tags = MusicForm.tags.value.split(',').map(tag => tag.trim());
 
-  await addDoc(musicaRef, { titulo, autor, anio, genero, tags });
-  MusicForm.reset();
-  mostrarMusica();
-});
+  addDoc(musicaRef, { titulo, autor, anio, genero, tags }).then(() => {
+    MusicForm.reset();
+    mostrarMusica();
+  });
+}
 
 async function mostrarMusica() {
   listaMusica.innerHTML = '';
@@ -51,39 +31,34 @@ async function mostrarMusica() {
     const cancion = docSnap.data();
     const div = document.createElement('div');
     div.className = 'card';
-
     const tags = cancion.tags?.join(', ') || 'Sin etiquetas';
 
     div.innerHTML = `
       <h3>${cancion.titulo}</h3>
-      <p> ${cancion.autor}</p>
-      <p> ${cancion.anio}</p>
-      <p> ${cancion.genero}</p>
-      <p> ${tags}</p>
+      <p>${cancion.autor}</p>
+      <p>${cancion.anio}</p>
+      <p>${cancion.genero}</p>
+      <p>${tags}</p>
       <button class="edit" onclick="editarMusica('${docSnap.id}', '${cancion.titulo}', '${cancion.autor}', ${cancion.anio}, '${cancion.genero}', '${tags}')">Editar</button>
       <button class="delete" onclick="eliminarMusica('${docSnap.id}')">Eliminar</button>
     `;
-
     listaMusica.appendChild(div);
   });
 }
 
-
-async function eliminarMusica(id) {
+window.eliminarMusica = async function(id) {
   await deleteDoc(doc(db, 'Musica', id));
   mostrarMusica();
-}
+};
 
-window.eliminarMusica = eliminarMusica;
-
-window.editarMusica = (id, titulo, autor, anio, genero, tags) => {
+window.editarMusica = function(id, titulo, autor, anio, genero, tags) {
   MusicForm.titulo.value = titulo;
   MusicForm.autor.value = autor;
   MusicForm.anio.value = anio;
   MusicForm.genero.value = genero;
   MusicForm.tags.value = tags;
 
-  MusicForm.onsubmit = async (e) => {
+  MusicForm.onsubmit = async function(e) {
     e.preventDefault();
     const nuevoTitulo = MusicForm.titulo.value;
     const nuevoAutor = MusicForm.autor.value;
@@ -105,31 +80,53 @@ window.editarMusica = (id, titulo, autor, anio, genero, tags) => {
   };
 };
 
-function guardarMusica(e) {
-  e.preventDefault();
-}
+document.getElementById("buscarTitulo").addEventListener("keyup", buscarCancion);
 
-async function buscarMusica() {
-  const texto = buscarInput.value.trim();
-  if (!texto) return mostrarMusica();
-
+async function buscarCancion() {
+  const tituloBuscado = document.getElementById("buscarTitulo").value.toLowerCase().trim();
   listaMusica.innerHTML = '';
-  const q = query(musicaRef, where('titulo', '==', texto));
-  const resultado = await getDocs(q);
+  const querySnapshot = await getDocs(musicaRef);
 
-  resultado.forEach(docSnap => {
+  querySnapshot.forEach((docSnap) => {
     const cancion = docSnap.data();
-    const div = document.createElement('div');
-    div.className = 'card';
-    div.innerHTML = `
-      <h3>${cancion.titulo}</h3>
-      <p>${cancion.autor}</p>
-      <p>${cancion.anio}</p>
-      <p>${cancion.genero}</p>
-      <p>${cancion.tags.join(', ')}</p>
-    `;
-    listaMusica.appendChild(div);
+    if (cancion.titulo.toLowerCase().includes(tituloBuscado)) {
+      const div = document.createElement('div');
+      div.className = 'card';
+      const tags = cancion.tags?.join(', ') || 'Sin etiquetas';
+
+      div.innerHTML = `
+        <h3>${cancion.titulo}</h3>
+        <p>${cancion.autor}</p>
+        <p>${cancion.anio}</p>
+        <p>${cancion.genero}</p>
+        <p>${tags}</p>
+        <button class="edit" onclick="editarMusica('${docSnap.id}', '${cancion.titulo}', '${cancion.autor}', ${cancion.anio}, '${cancion.genero}', '${tags}')">Editar</button>
+        <button class="delete" onclick="eliminarMusica('${docSnap.id}')">Eliminar</button>
+      `;
+      listaMusica.appendChild(div);
+    }
   });
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  const audio = document.getElementById('audioMusica');
+  document.body.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play().catch(e => console.log('No se pudo reproducir aún:', e));
+    }
+  }, { once: true });
+
+  const toggleBtn = document.getElementById('toggleMusica');
+  toggleBtn.addEventListener('click', () => {
+    if (audio.paused) {
+      audio.play();
+      toggleBtn.textContent = '──★ ˙🍓 Silenciar música ̟ !!';
+    } else {
+      audio.pause();
+      toggleBtn.textContent = '──★ ˙🍓 ̟Reproducir música !!';
+    }
+  });
+});
+
 mostrarMusica();
+
