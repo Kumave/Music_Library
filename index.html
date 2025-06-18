@@ -1,17 +1,16 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Biblioteca Musical</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
+<body>
   <audio id="audioMusica" autoplay loop>
-    <source src="./NANA.mp3.mp3" type="audio/mpeg">
+    <source src="./NANA.mp3.mp3" type="audio/mpeg" />
   </audio>
 
-<body>
- 
   <h1>⪩. .⪨ ┆My Music Library┆ ⤿💌 </h1>
   <form id="MusicForm">
     <input type="text" id="titulo" placeholder="⋆˚꩜｡ Título⋆˚꩜｡" required />
@@ -23,14 +22,14 @@
   </form>
 
   <div id="buscador">
-    <input type="text" id="buscarInput" placeholder="♯ೀ
-        ꒰੭ ﾟ ׅ Buscar por título... 𑁯 🎀 ﾟ ꒱ " />
-    <button onclick="buscarMusica()">Buscar</button>
+    <input type="text" id="buscarTitulo" placeholder="Buscar por título..." />
+    <button onclick="buscarCancion()">Buscar</button>
   </div>
 
   <div id="listaMusica" class="lista-musica"></div>
   <button id="toggleMusica" class="mute-btn"> ──★ ˙🍓Silenciar música ̟ !!</button>
 
   <script type="module" src="script.js"></script>
-  <body>
+</body>
 </html>
+
